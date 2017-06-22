@@ -43,7 +43,7 @@
         "hasCpSection": false,
         "changelogUrl": "https://raw.githubusercontent.com/PetterRuud/craft-locale-redirect/master/CHANGELOG.md",
         "components": {
-            "craftLocaleRedirect": "petterruud\\craftlocaleredirect\\services\\CraftLocaleRedirect"
+            "CraftLocaleRedirectService": "petterruud\\craftlocaleredirect\\services\\CraftLocaleRedirectService"
         },
         "class": "petterruud\\craftlocaleredirect\\CraftLocaleRedirect"
     }

@@ -15,6 +15,8 @@ use petterruud\craftlocaleredirect\CraftLocaleRedirect;
 use Craft;
 use craft\base\Component;
 
+use yii\web\Cookie;
+
 /**
  * CraftLocaleRedirect Service
  *
@@ -36,25 +38,16 @@ class CraftLocaleRedirectService extends Component
   protected $expires;
   // Public Methods
   // =========================================================================
-  /**
-   * Constructor
-   */
-  public function __construct()
-  {
-    $this->path = Craft::$app->getPath();
-    $this->querystring = Craft::$app->getQueryStringWithoutPath();
-    $this->expires = 60 * 60 * 24 * 365; // 1 year
-  }
 
    /**
    * Redirect to provided locale
    * @param string $locale
    */
-  public function redirectToLocale($locale)
+  public static function redirectToLocale($locale)
   {
-    $url = $this->newUrl($locale);
-    $this->setCookie('locale', $locale, time() + $this->expires);
-    Craft::$app->request->redirect($url, true, 302);
+    $url = self::newUrl($locale);
+    self::setCookie('locale', $locale);
+    Craft::$app->response->redirect($url, 302);
   }
   /**
    * Tries to find a match between the browser's preferred locales and the
@@ -64,17 +57,24 @@ class CraftLocaleRedirectService extends Component
    *
    * @return string
    */
-  public function getBrowserLanguageMatch()
+  public static function getBrowserLanguageMatch()
   {
-    $browserLanguages = craft()->request->getBrowserLanguages();
-    if ($browserLanguages)
-    {
-      $siteLocaleIds = Craft::$app->locales->getSiteLocaleIds();
-      foreach ($browserLanguages as $language)
-      {
-        if (in_array($language, $siteLocaleIds))
-        {
-          return $language;
+    $browserLanguages = array(Craft::$app->getRequest()->getAcceptableLanguages());
+    if ($browserLanguages) {
+      $siteLocales = Craft::$app->sites;
+      foreach ($siteLocales as $siteLocale) {
+        $locale = NULL;
+        switch($siteLocale->language) {
+          case 'nb-NO':
+            $locale = 'no';
+          break;
+          default:
+            $locale = $siteLocale->language;
+        }
+        echo 'locale=' . $locale;
+        if ( in_array($locale, $browserLanguages[0])) {
+          echo 'hit';
+          return $siteLocale->language;
         }
       }
     }
@@ -86,10 +86,19 @@ class CraftLocaleRedirectService extends Component
    * Return a new url with locale included
    * @param string $locale
    */
-  private function newUrl($locale)
+  private static function newUrl($locale)
   {
-    $qs = $this->querystring ? '?' . $this->querystring : '';
-    return UrlHelper::getSiteUrl($this->path, null, null, $locale) . $qs;
+    $path = Craft::$app->getPath();
+    $siteUrl = Craft::$app->request->getBaseUrl();
+    $querystring = Craft::$app->request->getQueryString();
+    $qs = $querystring ? '?' . $querystring : '';
+    echo "<hr>BACON<hr>";
+    var_dump($siteUrl);
+    var_dump($querystring);
+    var_dump($qs);
+
+    //return 'http://vg.no';
+    // UrlHelper::getsiteurl(($path, null, null, $locale) . $qs;
   }
   /**
    * Set a cookie
@@ -101,8 +110,9 @@ class CraftLocaleRedirectService extends Component
    * @param mixed $secure
    * @param mixed $httponly
    */
-  private function setCookie($name = "", $value = "", $expire = 0, $path = "/", $domain = "", $secure = false, $httponly = false)
+  private static function setCookie($name = "", $value = "", $expire = 0, $path = "/", $domain = "", $secure = false, $httponly = false)
   {
+    $expire = time() + 60 * 60 * 24 * 365; // 1 year
     setcookie($name, $value, (int) $expire, $path, $domain, $secure, $httponly);
     $_COOKIE[$name] = $value;
   }

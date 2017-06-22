@@ -10,7 +10,7 @@
 
 namespace petterruud\craftlocaleredirect;
 
-use petterruud\craftlocaleredirect\services\CraftLocaleRedirect as CraftLocaleRedirectService;
+use petterruud\craftlocaleredirect\services\CraftLocaleRedirectService as CraftLocaleRedirectService;
 
 use Craft;
 use craft\base\Plugin;
@@ -66,7 +66,26 @@ class CraftLocaleRedirect extends Plugin
     {
         parent::init();
         self::$plugin = $this;
-
+        
+        //!Craft::$app->isConsole() &&
+        // redirects only take place out of the CP
+		if( !Craft::$app->getRequest()->getIsConsoleRequest() && Craft::$app->getRequest()->getIsSiteRequest() && !Craft::$app->getRequest()->getIsLivePreview() ) {
+            var_dump(Craft::$app->getRequest()->getPreferredLanguage());
+    		$currentLocale = Craft::$app->sites->currentSite->language;
+			$localeCookie = isset($_COOKIE['locale']) ? $_COOKIE['locale'] : null;
+			$browserLanguageMatch = CraftLocaleRedirectService::getBrowserLanguageMatch();
+            echo '<h1>browserLanguageMatch=' . $browserLanguageMatch . '</h1><hr />';
+			// if there is a locale cookie
+			// redirect if it doesn't match the locale of the page requested
+			if ($localeCookie && $currentLocale != $localeCookie) {
+				CraftLocaleRedirectService::redirectToLocale($localeCookie);
+			}
+			// if there is no locale cookie
+			// redirect if there is a match between browser language settings and available Craft locales
+			if (!$localeCookie && $browserLanguageMatch) {
+				CraftLocaleRedirectService::redirectToLocale($browserLanguageMatch);
+			}
+		}
         // Do something after we're installed
         Event::on(
             Plugins::className(),
