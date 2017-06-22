@@ -1,0 +1,50 @@
+{
+    "name": "petterruud/craft-locale-redirect",
+    "description": "Locale auto changer",
+    "type": "craft-plugin",
+    "version": "1.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "craftlocaleredirect"
+    ],
+    "support": {
+        "docs": "https://github.com/PetterRuud/craft-locale-redirect/blob/master/README.md",
+        "issues": "https://github.com/PetterRuud/craft-locale-redirect/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Petter",
+            "homepage": "petter.me"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "~3.0.0-beta.1"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+          "petterruud\\craftlocaleredirect\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "CraftLocaleRedirect",
+        "handle": "craftLocaleRedirect",
+        "schemaVersion": "1",
+        "hasCpSettings": false,
+        "hasCpSection": false,
+        "changelogUrl": "https://raw.githubusercontent.com/PetterRuud/craft-locale-redirect/master/CHANGELOG.md",
+        "components": {
+            "craftLocaleRedirect": "petterruud\\craftlocaleredirect\\services\\CraftLocaleRedirect"
+        },
+        "class": "petterruud\\craftlocaleredirect\\CraftLocaleRedirect"
+    }
+}
