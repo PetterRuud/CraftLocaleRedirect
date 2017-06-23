@@ -14,7 +14,7 @@ use petterruud\craftlocaleredirect\CraftLocaleRedirect;
 
 use Craft;
 use craft\base\Component;
-
+use yii\helpers\Url;
 use yii\web\Cookie;
 
 /**
@@ -46,7 +46,7 @@ class CraftLocaleRedirectService extends Component
   public static function redirectToLocale($locale)
   {
     $url = self::newUrl($locale);
-    self::setCookie('locale', $locale);
+    self::setCookie('locale', $locale->language);
     Craft::$app->response->redirect($url, 302);
   }
   /**
@@ -57,24 +57,29 @@ class CraftLocaleRedirectService extends Component
    *
    * @return string
    */
-  public static function getBrowserLanguageMatch()
+  public static function getLanguageMatch($cookie)
   {
-    $browserLanguages = array(Craft::$app->getRequest()->getAcceptableLanguages());
-    if ($browserLanguages) {
-      $siteLocales = Craft::$app->sites;
+    if ($cookie !== null) {
+      $languages = array($cookie);
+    } else {
+      $languages = array(Craft::$app->getRequest()->getAcceptableLanguages()[0]);
+    }
+    if (!empty($languages)) {
+      var_dump($languages);
+      $siteLocales = Craft::$app->sites->getAllSites();
+      //var_dump($siteLocales);
       foreach ($siteLocales as $siteLocale) {
+        
         $locale = NULL;
-        switch($siteLocale->language) {
+        switch((array)$siteLocale->language) {
           case 'nb-NO':
             $locale = 'no';
           break;
           default:
             $locale = $siteLocale->language;
         }
-        echo 'locale=' . $locale;
-        if ( in_array($locale, $browserLanguages[0])) {
-          echo 'hit';
-          return $siteLocale->language;
+        if ( in_array($locale, $languages)) {
+          return $siteLocale;
         }
       }
     }
@@ -88,16 +93,19 @@ class CraftLocaleRedirectService extends Component
    */
   private static function newUrl($locale)
   {
+    echo "<hr>BACON<hr>";
+    var_dump($locale);
     $path = Craft::$app->getPath();
-    $siteUrl = Craft::$app->request->getBaseUrl();
+    $siteUrl = $locale->baseUrl;
     $querystring = Craft::$app->request->getQueryString();
     $qs = $querystring ? '?' . $querystring : '';
-    echo "<hr>BACON<hr>";
+    
     var_dump($siteUrl);
     var_dump($querystring);
     var_dump($qs);
-
-    //return 'http://vg.no';
+    //$url = URL::to([$siteUrl]) .$qs;
+    //var_dump($url);
+    return $siteUrl;
     // UrlHelper::getsiteurl(($path, null, null, $locale) . $qs;
   }
   /**
